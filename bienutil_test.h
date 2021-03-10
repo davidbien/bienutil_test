@@ -20,6 +20,9 @@
 typedef std::allocator< char >	_TyDefaultAllocator;
 #include "_compat.h"
 #include "_heapchk.h"
+#include "syslogmgr.inl"
+#include "_compat.inl"
+#include "gtest/gtest.h"
 
 namespace vs_bienutil_test
 {

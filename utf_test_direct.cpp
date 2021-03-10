@@ -1,11 +1,11 @@
-﻿// bienutil_test.cpp : Defines the entry point for the application.
+﻿// utf_test_direct.cpp : Direct test UTF conversions.
 //
 
 #include "bienutil_test.h"
 
 std::string g_strProgramName;
 
-namespace vs_bienutil_test
+namespace ns_UtfTestDirect
 {
 __BIENUTIL_USING_NAMESPACE
 
@@ -238,7 +238,7 @@ int _TryMain( int argc, char **argv )
 {
   return RUN_ALL_TESTS();
 }
-} // namespace vs_bienutil_test
+} // namespace ns_UtfTestDirect
 
 int main( int argc, char **argv )
 {
@@ -248,7 +248,7 @@ int main( int argc, char **argv )
   ::testing::InitGoogleTest(&argc, argv);
   try
   {
-    return vs_bienutil_test::_TryMain(argc, argv);
+    return ns_UtfTestDirect::_TryMain(argc, argv);
   }
   catch( const std::exception & rexc )
   {
