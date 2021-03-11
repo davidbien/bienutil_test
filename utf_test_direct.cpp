@@ -2,11 +2,13 @@
 //
 
 #include "bienutil_test.h"
+#include "_util.h"
 
 std::string g_strProgramName;
 
 namespace ns_UtfTestDirect
 {
+using namespace ns_bienutil_test;
 __BIENUTIL_USING_NAMESPACE
 
 class BienutilTestEnvironment : public ::testing::Environment
@@ -206,6 +208,24 @@ protected:
 			_TestConvertBoth( strChar16, strChar8 );
 		}
 	}
+
+	template < class t_TyChar >
+	void _PiecewiseConvertAllInvalidUTF32( const t_TyChar * _pc, size_t _nLen ) const
+	{
+		const t_TyChar * pcEnd = _pc + _nLen;
+		size_t nthTimeThrough = 0;
+		for ( const t_TyChar * pcCur = _pc; pcEnd != pcCur; ++nthTimeThrough )
+		{
+			char32_t u32;
+			char32_t * pcDest = &u32;
+			const t_TyChar * pcNext = PCConvertString( pcCur, ( pcEnd - pcCur ), pcDest, 1 );
+			VerifyThrow( !!pcNext );
+			Assert( pcNext != pcCur ); // must advance loop.
+			Assert( vkutf16ReplacementCharDefault == u32 );
+			pcCur = pcNext;
+		}
+	}
+
 protected:
 	bool m_fExpectFailure{false};
 };
@@ -232,6 +252,13 @@ TEST_F( TestUtfConversions, UtfTest1 )
 	{
 		TestUtf32CodePoint( *putf32InvalidCur );
 	}
+
+	// Now let's try some specific "known to be bogus" sequences and assert that they produce all replacement characters:
+	// From: 3.4  Concatenation of incomplete sequences.
+	// Have to use uint8_t because when it's a string the compiler decides to muck with the data... weird.
+	static const uint8_t rgcBogus_3_4_IncompleteSequences[] = { 0xC0, 0xE0, 0x80, 0xF0, 0x80, 0x80, 0xF8, 0x80, 0x80, 0x80, 0xFC, 0x80, 0x80, 0x80, 0x80, 0xDF, 0xEF, 0xBF, 0xF7, 0xBF, 0xBF, 0xFB, 0xBF, 0xBF, 0xBF, 0xFD, 0xBF, 0xBF, 0xBF, 0xBF };
+	// We will piecewise convert these so we can easily find the spot where it doesn't produce the right thing.
+	_PiecewiseConvertAllInvalidUTF32( (const char8_t*)rgcBogus_3_4_IncompleteSequences, DimensionOf( rgcBogus_3_4_IncompleteSequences ) );
 }
 
 int _TryMain( int argc, char **argv )

@@ -24,7 +24,7 @@ typedef std::allocator< char >	_TyDefaultAllocator;
 #include "_compat.inl"
 #include "gtest/gtest.h"
 
-namespace vs_bienutil_test
+namespace ns_bienutil_test
 {
 
 class BienutilTest : public testing::Test
@@ -40,4 +40,4 @@ protected:
   }
 };
 
-} // namespace vs_bienutil_test
+} // namespace ns_bienutil_test

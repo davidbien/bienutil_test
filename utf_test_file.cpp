@@ -21,7 +21,7 @@ public:
   typedef std::vector< uint8_t, default_init_allocator< uint8_t > > _TyVectorBuf;
 
   explicit UtfFileTestEnvironment( const char * _pszFileName )
-    : m_strFileNameOrig( _pszFileName )
+    : m_strFileName( _pszFileName )
   {
   }
 protected:
@@ -32,35 +32,35 @@ protected:
     // 2) Figure out the encoding of the file from the file name, but figure out any endianness from the BOM.
     // 3) If the endianness of the file doesn't match the endianness of the machine then we switch when reading the file.
     // 4) Read the file into a buffer which is then utitilized by the unit tests.
-    const char kcSlash = ( string::npos == m_strFileNameOrig.find( TChGetFileSeparator<char>() ) ) ? TChGetOtherFileSeparator<char>() : TChGetFileSeparator<char>();
-    VerifyThrowSz( FFileExists( m_strFileNameOrig.c_str() ), "Original test file[%s] doesn't exist.", m_strFileNameOrig.c_str() );
-    size_t nPosTxtExt = m_strFileNameOrig.rfind( ".txt" );
-    VerifyThrowSz( string::npos != nPosTxtExt, "File doesn't have an '.txt' extention [%s].", m_strFileNameOrig.c_str() );
+    const char kcSlash = ( string::npos == m_strFileName.find( TChGetFileSeparator<char>() ) ) ? TChGetOtherFileSeparator<char>() : TChGetFileSeparator<char>();
+    VerifyThrowSz( FFileExists( m_strFileName.c_str() ), "Original test file[%s] doesn't exist.", m_strFileName.c_str() );
+    size_t nPosTxtExt = m_strFileName.rfind( ".txt" );
+    VerifyThrowSz( string::npos != nPosTxtExt, "File doesn't have an '.txt' extention [%s].", m_strFileName.c_str() );
     // Don't rely on BOM being present - sus the encoding from the file name - fail if no encoding present.
     static constexpr char rgcUTFPrefix[] = "UTF-";
-    size_t nPosUTFPrefix = m_strFileNameOrig.rfind( rgcUTFPrefix );
-    VerifyThrowSz( string::npos != nPosUTFPrefix, "File doesn't have an 'UTF-' prefix indicating type [%s].", m_strFileNameOrig.c_str() );
+    size_t nPosUTFPrefix = m_strFileName.rfind( rgcUTFPrefix );
+    VerifyThrowSz( string::npos != nPosUTFPrefix, "File doesn't have an 'UTF-' prefix indicating type [%s].", m_strFileName.c_str() );
     size_t nUTF = 0;
-    int iResultReadNum = IReadPositiveNum( &m_strFileNameOrig[ nPosUTFPrefix + StaticStringLen( rgcUTFPrefix ) ], -1, nUTF, false );
+    int iResultReadNum = IReadPositiveNum( &m_strFileName[ nPosUTFPrefix + StaticStringLen( rgcUTFPrefix ) ], -1, nUTF, false );
     VerifyThrowSz( !iResultReadNum && ( ( 8 == nUTF ) || ( 16 == nUTF ) || ( 32 == nUTF ) ), "Couldn't find an '8', '16' or '32' following the 'UTF-' prefix." );
     // Now if 16 or 32 then we expect a BOM on the file so we don't need to otherwise check for endianness.
     // A UTF-8 file may or may not have a BOM.
-    size_t nPosPrevSlash = m_strFileNameOrig.rfind( kcSlash );
-    VerifyThrowSz( string::npos != nPosPrevSlash, "Need full path to input file[%s] - couldn't find preceding slash.", m_strFileNameOrig.c_str() );
-    VerifyThrowSz( nPosTxtExt > nPosPrevSlash+1, "uh that's not an acceptable file name [%s].", m_strFileNameOrig.c_str() );
+    size_t nPosPrevSlash = m_strFileName.rfind( kcSlash );
+    VerifyThrowSz( string::npos != nPosPrevSlash, "Need full path to input file[%s] - couldn't find preceding slash.", m_strFileName.c_str() );
+    VerifyThrowSz( nPosTxtExt > nPosPrevSlash+1, "uh that's not an acceptable file name [%s].", m_strFileName.c_str() );
     string strBaseFile("unittests");
     strBaseFile += TChGetFileSeparator<char>();
-    strBaseFile += m_strFileNameOrig.substr( nPosPrevSlash+1, nPosTxtExt - ( nPosPrevSlash+1 ) );
-    FileObj fo( OpenReadOnlyFile( m_strFileNameOrig.c_str() ) );
-    VerifyThrowSz( fo.FIsOpen(), "Couldn't open file [%s]", m_strFileNameOrig.c_str() );
+    strBaseFile += m_strFileName.substr( nPosPrevSlash+1, nPosTxtExt - ( nPosPrevSlash+1 ) );
+    FileObj fo( OpenReadOnlyFile( m_strFileName.c_str() ) );
+    VerifyThrowSz( fo.FIsOpen(), "Couldn't open file [%s]", m_strFileName.c_str() );
     uint8_t rgbyBOM[vknBytesBOM];
     size_t nbyLenghtBOM;
     int iResult = FileRead( fo.HFileGet(), rgbyBOM, vknBytesBOM, &nbyLenghtBOM );
     Assert( !iResult );
     Assert( nbyLenghtBOM == vknBytesBOM );
-    VerifyThrowSz( !iResult && ( nbyLenghtBOM == vknBytesBOM ), "Unable to read [%lu] bytes from the file[%s].", vknBytesBOM, m_strFileNameOrig.c_str() );
+    VerifyThrowSz( !iResult && ( nbyLenghtBOM == vknBytesBOM ), "Unable to read [%lu] bytes from the file[%s].", vknBytesBOM, m_strFileName.c_str() );
     EFileCharacterEncoding efceEncoding = GetCharacterEncodingFromBOM( rgbyBOM, nbyLenghtBOM );
-    VerifyThrowSz( ( efceFileCharacterEncodingCount != efceEncoding ) || ( 8 == nUTF ), "For UTF-16 and UTF-32 we reqiure a BOM on the unittest files so that we can tell little from big endian[%s].", m_strFileNameOrig.c_str() );
+    VerifyThrowSz( ( efceFileCharacterEncodingCount != efceEncoding ) || ( 8 == nUTF ), "For UTF-16 and UTF-32 we reqiure a BOM on the unittest files so that we can tell little from big endian[%s].", m_strFileName.c_str() );
     EFileCharacterEncoding efceEncodingThisMachine = ( efceFileCharacterEncodingCount == efceEncoding ) ? ( efceEncoding = efceUTF8 ) : GetEncodingThisMachine( efceEncoding );
     EFileCharacterEncoding efceEncodingFromFile = ( 8 == nUTF ) ? efceUTF8 : ( ( 16 == nUTF ) ? GetEncodingThisMachine( efceUTF16LE ) : GetEncodingThisMachine( efceUTF32LE ) );
     VerifyThrowSz( ( efceEncodingThisMachine == efceEncodingFromFile ), "Encoding from BOM doesn't match encoding within the filename[%s].", m_strFileName.c_str() );
@@ -69,12 +69,12 @@ protected:
     VerifyThrowSz( !!nbySizeFile, "Must have a non-zero length file to unit test squat." );
     VerifyThrowSz( !( nbySizeFile % ( nUTF / CHAR_BIT ) ), "File isn't an integral multiple of character size[%s].", m_strFileName.c_str() );
     _TyVectorBuf bufRead;
-    bufRead.resize( nbySizeFile )
+    bufRead.resize( nbySizeFile );
     // Now seek to the end of any BOM:
     (void)NFileSeekAndThrow( fo.HFileGet(), nbyLenghtBOM, vkSeekBegin );
     size_t nbyBytesRead;
-    int iResult = FileRead( fo.HFileGet(), &bufRead[0], nbySizeFile, &nbyBytesRead );
-    VerifyThrowSz( !iResult && ( nbySizeFile == nbyBytesRead ), "Error reading data from file [%s].", m_strFileNameOrig.c_str() );
+    iResult = FileRead( fo.HFileGet(), &bufRead[0], nbySizeFile, &nbyBytesRead );
+    VerifyThrowSz( !iResult && ( nbySizeFile == nbyBytesRead ), "Error reading data from file [%s].", m_strFileName.c_str() );
     if ( efceEncodingThisMachine != efceEncoding )
     {
       Assert( ( nUTF == 16 ) || ( nUTF == 32 ) );
@@ -85,7 +85,7 @@ protected:
         SwitchEndian( reinterpret_cast< char32_t * >( &bufRead[0] ), nbySizeFile / sizeof( char32_t ) );
     }
     m_buf = std::move( bufRead );
-    m_strBaseFile = std::move( strBaseFile );
+    m_strBaseFileOutput= std::move( strBaseFile );
     m_nUTFOrig = nUTF;
   }
   // TearDown() is invoked immediately after a test finishes.
@@ -94,7 +94,11 @@ protected:
     // Nothing to do in TearDown() - we want to leave the generated unit test files so that they can be analyzed if there are any issues.
   }
 public:
-  string m_strFileNameOrig;
+  pair< const void *, size_t > GetPrPvSize()
+  {
+    return pair< const void *, size_t >( &m_buf[0], m_buf.size() );
+  }
+  string m_strFileName;
   string m_strBaseFileOutput; // base output file.
   _TyVectorBuf m_buf;
   size_t m_nUTFOrig{0};
@@ -129,15 +133,18 @@ protected:
   // SetUp() is run immediately before a test starts.
   void SetUp() override 
   {
+    m_str8Converted.clear();
+    m_str16Converted.clear();
+    m_str32Converted.clear();
     std::tie(m_fUseBIENConv, m_fUseLastBit) = GetParam();
     // We will always write the output files in the endianness of the current machine.
     m_strOutputFile = vpufteUtfFileTestEnvironment->m_strBaseFileOutput;
-    m_nUtfConvTo = fUseLastBit ? 32 : 8;
+    m_nUtfConvTo = m_fUseLastBit ? 32 : 8;
     if ( m_nUtfConvTo == vpufteUtfFileTestEnvironment->m_nUTFOrig )
       m_nUtfConvTo = 16;
     m_strOutputFile += "_to_UTF-";
-    m_strOutputFile += itoa( m_nUtfConvTo );
-    m_strOutputFile += fUseBIENConv ? "_BIEN.txt" : "_ICU.txt";
+    m_strOutputFile += to_string( m_nUtfConvTo );
+    m_strOutputFile += m_fUseBIENConv ? "_BIEN.txt" : "_ICU.txt";
     FileObj foOut( CreateWriteOnlyFile( m_strOutputFile.c_str() ) );
     VerifyThrowSz( foOut.FIsOpen(), "Unable to open [%s] for writing.", m_strOutputFile.c_str() );
     m_foOutputFile.swap( foOut );
@@ -169,7 +176,104 @@ protected:
   }
   void DoTest()
   {
-
+    Assert( m_nUtfConvTo != vpufteUtfFileTestEnvironment->m_nUTFOrig );
+    pair< const void *, size_t > prVpSz = vpufteUtfFileTestEnvironment->GetPrPvSize();
+    if ( m_fUseBIENConv )
+    {
+      switch( m_nUtfConvTo )
+      {
+        case 8:
+        {
+          switch( vpufteUtfFileTestEnvironment->m_nUTFOrig )
+          {
+            case 16:
+              ns_CONVBIEN::ConvertString( m_str8Converted, (const char16_t*)prVpSz.first, prVpSz.second );
+            break;
+            case 32:
+              ns_CONVBIEN::ConvertString( m_str8Converted, (const char32_t*)prVpSz.first, prVpSz.second );
+            break;
+          }
+        }
+        break;
+        case 16:
+        {
+          switch( vpufteUtfFileTestEnvironment->m_nUTFOrig )
+          {
+            case 8:
+              ns_CONVBIEN::ConvertString( m_str16Converted, (const char8_t*)prVpSz.first, prVpSz.second );
+            break;
+            case 32:
+              ns_CONVBIEN::ConvertString( m_str16Converted, (const char32_t*)prVpSz.first, prVpSz.second );
+            break;
+          }
+        }
+        break;
+        case 32:
+        {
+          switch( vpufteUtfFileTestEnvironment->m_nUTFOrig )
+          {
+            case 8:
+              ns_CONVBIEN::ConvertString( m_str32Converted, (const char8_t*)prVpSz.first, prVpSz.second );
+            break;
+            case 16:
+              ns_CONVBIEN::ConvertString( m_str32Converted, (const char16_t*)prVpSz.first, prVpSz.second );
+            break;
+          }
+        }
+        break;
+        default:
+          VerifyThrow( false );
+        break;
+      }
+    }
+    else
+    {
+      switch( m_nUtfConvTo )
+      {
+        case 8:
+        {
+          switch( vpufteUtfFileTestEnvironment->m_nUTFOrig )
+          {
+            case 16:
+              ns_CONVICU::ConvertString( m_str8Converted, (const char16_t*)prVpSz.first, prVpSz.second );
+            break;
+            case 32:
+              ns_CONVICU::ConvertString( m_str8Converted, (const char32_t*)prVpSz.first, prVpSz.second );
+            break;
+          }
+        }
+        break;
+        case 16:
+        {
+          switch( vpufteUtfFileTestEnvironment->m_nUTFOrig )
+          {
+            case 8:
+              ns_CONVICU::ConvertString( m_str16Converted, (const char8_t*)prVpSz.first, prVpSz.second );
+            break;
+            case 32:
+              ns_CONVICU::ConvertString( m_str16Converted, (const char32_t*)prVpSz.first, prVpSz.second );
+            break;
+          }
+        }
+        break;
+        case 32:
+        {
+          switch( vpufteUtfFileTestEnvironment->m_nUTFOrig )
+          {
+            case 8:
+              ns_CONVICU::ConvertString( m_str32Converted, (const char8_t*)prVpSz.first, prVpSz.second );
+            break;
+            case 16:
+              ns_CONVICU::ConvertString( m_str32Converted, (const char16_t*)prVpSz.first, prVpSz.second );
+            break;
+          }
+        }
+        break;
+        default:
+          VerifyThrow( false );
+        break;
+      }
+    }
   }
 };
 TEST_P( TestUtfFile, TestUtfFile ) 
