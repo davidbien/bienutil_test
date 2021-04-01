@@ -299,6 +299,9 @@ int _TryMain( int argc, char **argv )
 
 int main( int argc, char **argv )
 {
+#ifdef WIN32
+	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif //WIN32
   __BIENUTIL_USING_NAMESPACE
 
   g_strProgramName = argv[0];

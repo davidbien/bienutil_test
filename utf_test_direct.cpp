@@ -11,28 +11,6 @@ namespace ns_UtfTestDirect
 using namespace ns_bienutil_test;
 __BIENUTIL_USING_NAMESPACE
 
-class BienutilTestEnvironment : public ::testing::Environment
-{
-  typedef BienutilTestEnvironment _TyThis;
-  typedef ::testing::Environment _TyBase;
-public:
-  explicit BienutilTestEnvironment()
-  {
-  }
-protected:
-  void SetUp() override 
-	{
-	}
-  
-
-  // TearDown() is invoked immediately after a test finishes.
-  void TearDown() override 
-  {
-    // Nothing to do in TearDown() - we want to leave the generated unit test files so that they can be analyzed if there are any issues.
-  }
-public:
-};
-
 BienutilTestEnvironment * vpxteBienutilTestEnvironment{nullptr};
 
 using ::testing::TestWithParam;
@@ -269,6 +247,9 @@ int _TryMain( int argc, char **argv )
 
 int main( int argc, char **argv )
 {
+#ifdef WIN32
+	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif //WIN32
   __BIENUTIL_USING_NAMESPACE
 
   g_strProgramName = argv[0];

@@ -53,3 +53,14 @@ gtest_discover_tests(utf_test_file
                     TEST_SUFFIX .${UTFTEST_NAME}
 )
 endforeach()
+
+# LogArray testing:
+add_executable (logarray_test "logarray_test.cpp" "bienutil_test.h")
+target_include_directories(logarray_test PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bienutil>
+)
+target_compile_definitions( logarray_test
+  PUBLIC __NDEBUG_THROW
+)
+target_link_libraries(logarray_test gtest gtest_main)
+gtest_discover_tests(logarray_test)

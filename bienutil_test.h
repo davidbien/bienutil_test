@@ -27,6 +27,28 @@ typedef std::allocator< char >	_TyDefaultAllocator;
 namespace ns_bienutil_test
 {
 
+class BienutilTestEnvironment : public ::testing::Environment
+{
+  typedef BienutilTestEnvironment _TyThis;
+  typedef ::testing::Environment _TyBase;
+public:
+  explicit BienutilTestEnvironment()
+  {
+  }
+protected:
+  void SetUp() override 
+	{
+	}
+  
+
+  // TearDown() is invoked immediately after a test finishes.
+  void TearDown() override 
+  {
+    // Nothing to do in TearDown() - we want to leave the generated unit test files so that they can be analyzed if there are any issues.
+  }
+public:
+};
+
 class BienutilTest : public testing::Test
 {
   typedef BienutilTest _TyThis;
