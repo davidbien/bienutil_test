@@ -38,7 +38,7 @@ protected:
   
   static const size_t s_knCountTestFixedBlocks = 13;
     // This defines the starting point size of each test on a given type.
-  static const size_t s_knMaxCountTestElements = _TyLogArray::s_knElementsFixedBoundary + s_knCountTestFixedBlocks * ( 1 << _TyLogArray::s_knPow2Max );
+  static const size_t s_knMaxCountTestElements = _TyLogArray::s_knElementsFixedBoundary + s_knCountTestFixedBlocks * ( 1ull << _TyLogArray::s_knPow2Max );
     // We will test all sizes equal to or less than this.
   void DoTestLogArray()
   {
@@ -65,17 +65,35 @@ protected:
   void _TestSizedLogArray( _TyLogArray & _la, bool _fWithUnconstructedElementAtEnd )
   {
     _VerifyLogArray( _la );
-    if ( _fWithUnconstructedElementAtEnd )
-    {
-      _la._PbyAllocEnd();
-      Assert( _la.NElements() + 1 == _la.NElementsAllocated() );
-    }
-    else
-      Assert( _la.NElements() == _la.NElementsAllocated() );
     
     // Due to horrendous boundary conditions we want to exhaustively test removal from end scenarios:
     size_t nNewElements = _la.NElements();
-    for (  )
+    for ( size_t nNewElementsCur = _la.NElements(); nNewElementsCur != size_t(-1); --nNewElementsCur )
+    {
+      _TyLogArray laCopy( _la );
+      if ( _fWithUnconstructedElementAtEnd )
+      {
+        laCopy._PvAllocEnd(); // This is a safe call because it doesn't assume anything is constructed.
+        Assert( laCopy.NElements() + 1 == laCopy.NElementsAllocated() );
+      }
+      else
+        Assert( laCopy.NElements() == laCopy.NElementsAllocated() );
+      _VerifyLogArray( laCopy );
+      laCopy.SetSize( nNewElementsCur );
+      _VerifyLogArray( laCopy );
+      // _VerifyLogArrayContigRange( laCopy ); - later.
+      // Now reset the size to the original to test endpoints there:
+      laCopy.SetSize( _la.GetSize() * 2 ); // Size it up to double the original for fun.
+      size_t nMarkNewElements = nNewElementsCur;
+      laCopy.ApplyContiguous( nNewElementsCur, laCopy.GetSize(), 
+        [&nMarkNewElements]( _TyT * _ptBegin, _TyT * _ptEnd )
+        {
+          for ( _TyT * ptCur = _ptBegin; _ptEnd != ptCur; )
+            *ptCur++ = nMarkNewElements++;
+        }
+      );
+      _VerifyLogArray( laCopy );
+    }
 
   }
   void _VerifyLogArray( _TyLogArray const & _la )
@@ -93,14 +111,14 @@ protected:
     {
       for ( size_t nViewEnd = 0; nViewEnd < _la.NElements() + 10; ++nViewEnd )
       {
-        bool fExpectFailure = ( nViewStart < nViewEnd ) || ( nViewStart > _la.NElements() );
+        bool fExpectFailure = ( nViewStart > nViewEnd ) || ( nViewEnd > _la.NElements() );
         try
         {
           _TyT nCurEl = nViewStart;
           _la.ApplyContiguous( nViewStart, nViewEnd,
-            [&nCurEl]( _TyT * _ptBegin, _TyT * _ptEnd )
+            [&nCurEl]( const _TyT * _ptBegin, const _TyT * _ptEnd )
             {
-              for ( _TyT * ptCur = _ptBegin; _ptEnd != ptCur; ++ptCur )
+              for ( const _TyT * ptCur = _ptBegin; _ptEnd != ptCur; ++ptCur )
                 Assert( nCurEl++ == *ptCur );
             }
           );
@@ -122,7 +140,7 @@ TYPED_TEST_SUITE_P( TestLogArray );
 
 TYPED_TEST_P( TestLogArray, LogArrayTest1 )
 {
-
+  this->DoTestLogArray();
 }
 
 REGISTER_TYPED_TEST_SUITE_P(
