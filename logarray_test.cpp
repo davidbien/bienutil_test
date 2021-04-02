@@ -42,6 +42,19 @@ protected:
     // We will test all sizes equal to or less than this.
   void DoTestLogArray()
   {
+#if 0
+    _TyLogArray la( 16 );
+    _TyT tCur{};
+    la.ApplyContiguous( 0, la.GetSize(),
+      [&tCur]( _TyT * _ptBegin, _TyT * _ptEnd )
+      {
+        std::generate_n( _ptBegin, _ptEnd - _ptBegin, 
+          [&tCur]() { return tCur++; }
+        );
+      }
+    );
+    _TestSizedLogArray( la, true );
+#else //0
     size_t nElementsCur = 0;
     const size_t knElementsMax = s_knMaxCountTestElements;
     for ( ; nElementsCur != knElementsMax; ++nElementsCur )
@@ -60,6 +73,7 @@ protected:
       _TestSizedLogArray( la, true );
       _TestSizedLogArray( la, false );
     }
+#endif //0
   }
   // Since we are using size_t we similate the unconstructed element at the end, but the effect is exactly the same...
   void _TestSizedLogArray( _TyLogArray & _la, bool _fWithUnconstructedElementAtEnd )
