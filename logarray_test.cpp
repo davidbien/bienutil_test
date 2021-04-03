@@ -16,6 +16,48 @@ BienutilTestEnvironment * vpxteBienutilTestEnvironment{nullptr};
 
 using ::testing::Types;
 
+// Type that stores a long but allocates it in dynamic memory.
+// Makes sure that we delete all contained objects in a LogArray<>.
+template < class t_TyTScalar >
+class ScalarHolder
+{
+  typedef ScalarHolder _TyThis;
+public:
+  typedef t_TyTScalar _TyTScalar;
+
+  ScalarHolder()
+    : m_upScalar( make_unique< _TyTScalar >( _TyTScalar{} ) )
+  {
+  }
+  ~ScalarHolder() = default;
+  ScalarHolder( ScalarHolder const & _r )
+    : m_upScalar( make_unique< _TyTScalar >( _r ) )
+  {
+  }
+  ScalarHolder & operator =( ScalarHolder const & ) = default;
+  ScalarHolder( ScalarHolder && ) = default;
+  ScalarHolder & operator =( ScalarHolder && ) = default;
+  ScalarHolder( _TyTScalar _t )
+    : m_upScalar( make_unique< _TyTScalar >( _t ) )
+  {
+  }
+  ScalarHolder & operator =( t_TyTScalar const & _rt )
+  {
+    *m_upScalar = _rt;
+    return *this;
+  }
+  operator _TyTScalar () const
+  {
+    return *m_upScalar;
+  }
+  _TyTScalar operator ++( int )
+  {
+    return (*m_upScalar)++;
+  }
+protected:
+  unique_ptr< _TyTScalar > m_upScalar;
+};
+
 // TestLogArray:
 // Test my new impl of UTF encoding conversions vs. ICU's open source library impl.
 template < class t_TyLogArray >
@@ -43,7 +85,7 @@ protected:
   void DoTestLogArray()
   {
 #if 0
-    _TyLogArray la( 16 );
+    _TyLogArray la( 2 );
     _TyT tCur{};
     la.ApplyContiguous( 0, la.GetSize(),
       [&tCur]( _TyT * _ptBegin, _TyT * _ptEnd )
@@ -53,7 +95,10 @@ protected:
         );
       }
     );
-    _TestSizedLogArray( la, true );
+    la._PvAllocEnd();
+    //la.SetSize( 1 );
+    la.Clear();
+    // _TestSizedLogArray( la, true );
 #else //0
     size_t nElementsCur = 0;
     const size_t knElementsMax = s_knMaxCountTestElements;
@@ -162,14 +207,13 @@ REGISTER_TYPED_TEST_SUITE_P(
     // The rest of the arguments are the test names.
     LogArrayTest1);
 
-typedef LogArray< size_t, 0, 5 > _TyLogArray_0_5;
-typedef LogArray< size_t, 1, 2 > _TyLogArray_1_2;
-typedef LogArray< size_t, 1, 4 > _TyLogArray_1_4;
-typedef LogArray< size_t, 2, 3 > _TyLogArray_2_3;
-typedef LogArray< size_t, 4, 8 > _TyLogArray_4_8;
-typedef LogArray< size_t, 4, 8 > _TyLogArray_3_3;
+typedef LogArray< ScalarHolder< size_t >, 0, 5 > _TyLogArray_0_5;
+typedef LogArray< ScalarHolder< size_t >, 1, 2 > _TyLogArray_1_2;
+typedef LogArray< ScalarHolder< size_t >, 1, 4 > _TyLogArray_1_4;
+typedef LogArray< ScalarHolder< size_t >, 2, 3 > _TyLogArray_2_3;
+typedef LogArray< ScalarHolder< size_t >, 3, 3 > _TyLogArray_3_3;
 
-typedef Types< _TyLogArray_0_5, _TyLogArray_1_2, _TyLogArray_1_4, _TyLogArray_2_3, _TyLogArray_4_8, _TyLogArray_3_3 > vTyLogArrayTestTypes;
+typedef Types< _TyLogArray_1_2, _TyLogArray_3_3, _TyLogArray_1_4, _TyLogArray_2_3/*, _TyLogArray_0_5*/ > vTyLogArrayTestTypes;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(LogArrayTestInstance,    // Instance name
                                TestLogArray,             // Test case name
