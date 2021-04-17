@@ -1,5 +1,6 @@
-﻿// utf_test_direct.cpp : Direct test UTF conversions.
-//
+﻿// logarray_test.cpp : Direct test new LogArray impl.
+// dbien
+// 01APR2021
 
 #include "bienutil_test.h"
 #include "_logarray.h"

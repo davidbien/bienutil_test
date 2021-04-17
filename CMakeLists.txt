@@ -64,3 +64,14 @@ target_compile_definitions( logarray_test
 )
 target_link_libraries(logarray_test gtest gtest_main)
 gtest_discover_tests(logarray_test)
+
+# SharedPtr testing:
+add_executable (shared_obj_test "shared_obj_test.cpp" "bienutil_test.h")
+target_include_directories(shared_obj_test PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bienutil>
+)
+target_compile_definitions( shared_obj_test
+  PUBLIC __NDEBUG_THROW
+)
+target_link_libraries(shared_obj_test gtest gtest_main)
+gtest_discover_tests(shared_obj_test)
