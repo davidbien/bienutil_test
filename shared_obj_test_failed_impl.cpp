@@ -1,4 +1,5 @@
-// shared_obj_test.cpp : Direct test new SharedPtr impl.
+// shared_obj_test_failed_impl.cpp : Direct test new SharedPtr impl.
+// This is the unit test for shared_obj_failed_impl.h. It is a failed implementation but I want to keep it on the backburner in case I can figure any way around the catch-22.
 // dbien
 // 16APR2021
 
@@ -18,10 +19,10 @@ BienutilTestEnvironment * vpxteBienutilTestEnvironment{nullptr};
 using ::testing::Types;
 
 // TSharedObj1: Destructor doesn't throw.
-class TSharedObj1 : public SharedObjectBase< true >
+class TSharedObj1 : public SharedObjectBase< TSharedObj1, true >
 {
   typedef TSharedObj1 _TyThis;
-  typedef SharedObjectBase< true > _TyBase;
+  typedef SharedObjectBase< TSharedObj1, true > _TyBase;
 public:
   TSharedObj1()
   {
@@ -70,16 +71,12 @@ protected:
   {
     // Let's try some stuff:
     SharedPtr< _TySharedEl > spse;
-    spse.emplace();
+    new( spse ) _TySharedEl();
     SharedPtr< const _TySharedEl > spcse;
-    spcse.emplace();
+    new( spcse ) _TySharedEl();
     spcse = spse;
-    SharedPtr< volatile _TySharedEl > spvse;
-    spvse.emplace();
-    spvse = spse;
     SharedPtr< const volatile _TySharedEl > spcvse( spcse );
     spcvse = spcse;
-    spcvse = spvse;
     spcvse = spse;
     // To test compiling these just uncomment them one by one and compile the unit test... I know, annoying.
     // spse = spcvse; // this should fail to compile.
@@ -87,15 +84,11 @@ protected:
     // spcse = spcvse; // this should fail to compile.
 
     SharedPtr< _TySharedElDerived > spseDerived;
-    spse = spseDerived;
-    spcse = spseDerived;
-    spvse = spseDerived;
-    spcvse = spseDerived;
+    new( spcse ) _TySharedElDerived();
+    new( spseDerived ) _TySharedElDerived();
+    // This shouldn't compile, and it does currently... hmmm...
+    new( spseDerived ) _TySharedEl();
     
-    // spseDerived = spse; // this should fail to compile.
-    spse.template emplaceDerived< _TySharedElDerived >();
-    // This should fail to compile because we are creating a const _TySharedElDerived into a non-const container.
-    // spse.template emplaceDerived< const _TySharedElDerived >();
   }
 protected:
 	bool m_fExpectFailure{false};
