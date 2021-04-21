@@ -4,6 +4,7 @@
 
 #include "bienutil_test.h"
 #include "shared_obj.h"
+#include <utility>
 #include "_util.h"
 
 std::string g_strProgramName;
@@ -96,6 +97,9 @@ protected:
     spse.template emplaceDerived< _TySharedElDerived >();
     // This should fail to compile because we are creating a const _TySharedElDerived into a non-const container.
     // spse.template emplaceDerived< const _TySharedElDerived >();
+
+    // in-place construct a derived object:
+    SharedPtr< const _TySharedEl > spcseDerived( in_place_type< _TySharedElDerived > );
   }
 protected:
 	bool m_fExpectFailure{false};
