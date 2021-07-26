@@ -24,6 +24,8 @@ class AllocatorThrowMove
 {
   typedef AllocatorThrowMove _TyThis;
   typedef allocator< t_TyT > _TyAllocator; // the actual allocator.
+  template < class t_TyT >
+  friend class AllocatorThrowMove;
 public:
   typedef t_TyT _TyT;
   typedef typename _TyAllocator::value_type value_type;
@@ -36,6 +38,11 @@ public:
   AllocatorThrowMove( AllocatorThrowMove const & ) = default;
   AllocatorThrowMove( AllocatorThrowMove && _r ) noexcept( false )
     : m_alloc( std::move( _r.m_alloc ) )
+  {
+  }
+  template < class t_TyOther >
+  AllocatorThrowMove( AllocatorThrowMove< t_TyOther > const & _r )
+    : m_alloc( _r.m_alloc )
   {
   }
   constexpr _TyT* allocate( std::size_t n )
@@ -54,6 +61,8 @@ class AllocatorThrowDestruct
 {
   typedef AllocatorThrowDestruct _TyThis;
   typedef allocator< t_TyT > _TyAllocator; // the actual allocator.
+  template < class t_TyT >
+  friend class AllocatorThrowDestruct;
 public:
   typedef t_TyT _TyT;
   typedef typename _TyAllocator::value_type value_type;
@@ -67,6 +76,11 @@ public:
   AllocatorThrowDestruct() = default;
   AllocatorThrowDestruct( AllocatorThrowDestruct const & ) = default;
   AllocatorThrowDestruct( AllocatorThrowDestruct && _r ) = default;
+  template < class t_TyOther >
+  AllocatorThrowDestruct( AllocatorThrowDestruct< t_TyOther > const & _r )
+    : m_alloc( _r.m_alloc )
+  {
+  }
   constexpr _TyT* allocate( std::size_t n )
   {
     return m_alloc.allocate( n );
@@ -83,6 +97,8 @@ class AllocatorThrowMoveDestruct
 {
   typedef AllocatorThrowMoveDestruct _TyThis;
   typedef allocator< t_TyT > _TyAllocator; // the actual allocator.
+  template < class t_TyT >
+  friend class AllocatorThrowMoveDestruct;
 public:
   typedef t_TyT _TyT;
   typedef typename _TyAllocator::value_type value_type;
@@ -97,6 +113,11 @@ public:
   AllocatorThrowMoveDestruct( AllocatorThrowMoveDestruct const & ) = default;
   AllocatorThrowMoveDestruct( AllocatorThrowMoveDestruct && _r ) noexcept( false )
     : m_alloc( std::move( _r.m_alloc ) )
+  {
+  }
+  template < class t_TyOther >
+  AllocatorThrowMoveDestruct( AllocatorThrowMoveDestruct< t_TyOther > const & _r )
+    : m_alloc( _r.m_alloc )
   {
   }
   constexpr _TyT* allocate( std::size_t n )
@@ -152,6 +173,8 @@ protected:
   {
   }
   
+  // This just does single thread testing. All operations should me atomic but it might be nice to stress test that
+  //  with multiple threads.
   void DoTestSharedWeakPointer()
   {
     // Let's try some stuff:
@@ -173,7 +196,20 @@ protected:
     _TyConstVolatileSharedWeakPtr1 wpcv1( sp1 );
     wpcv1 = wpc1;
 
-
+    // Create weak pointer only - might end up being useful.
+    wpc1.emplace();
+    try
+    {
+      spc1 = wpc1; // should throw due to no object.
+    }
+    catch( _SharedWeakPtr_no_object_present_exception const & )
+    {
+      // we expect this.
+    }
+    sp1->m_str = "foo";
+    // spc1->m_str = "foo"; - doesn't compile appropriately.
+    // spcv1->m_str = "foo"; - doesn't compile appropriately.
+    // sp1 = spcv1; - doesn't compile appropriately.
   }
 protected:
 	bool m_fExpectFailure{false};
