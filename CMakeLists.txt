@@ -75,3 +75,15 @@ target_compile_definitions( shared_obj_test
 )
 target_link_libraries(shared_obj_test gtest gtest_main)
 gtest_discover_tests(shared_obj_test)
+
+# SharedWeakPtr testing:
+add_executable (shared_weak_test "shared_weak_test.cpp" "bienutil_test.h")
+target_include_directories(shared_weak_test PUBLIC
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/bienutil>
+)
+target_compile_definitions( shared_weak_test
+  PUBLIC __NDEBUG_THROW
+)
+target_link_libraries(shared_weak_test gtest gtest_main)
+gtest_discover_tests(shared_weak_test)
+

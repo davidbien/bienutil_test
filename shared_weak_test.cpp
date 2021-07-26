@@ -25,22 +25,24 @@ class AllocatorThrowMove
   typedef AllocatorThrowMove _TyThis;
   typedef allocator< t_TyT > _TyAllocator; // the actual allocator.
 public:
+  typedef t_TyT _TyT;
   typedef typename _TyAllocator::value_type value_type;
   typedef typename _TyAllocator::size_type size_type;
   typedef typename _TyAllocator::difference_type difference_type;
   typedef typename _TyAllocator::propagate_on_container_move_assignment propagate_on_container_move_assignment;
 
   ~AllocatorThrowMove() = default;
-  AllocatorThrowDestruct( AllocatorThrowMove const & ) = default;
+  AllocatorThrowMove() = default;
+  AllocatorThrowMove( AllocatorThrowMove const & ) = default;
   AllocatorThrowMove( AllocatorThrowMove && _r ) noexcept( false )
     : m_alloc( std::move( _r.m_alloc ) )
   {
   }
-  [[nodiscard]] constexpr T* allocate( std::size_t n )
+  constexpr _TyT* allocate( std::size_t n )
   {
     return m_alloc.allocate( n );
   }
-  constexpr void deallocate( T* p, std::size_t n )
+  constexpr void deallocate( _TyT* p, std::size_t n )
   {
     return m_alloc.deallocate( p, n );
   }
@@ -53,6 +55,7 @@ class AllocatorThrowDestruct
   typedef AllocatorThrowDestruct _TyThis;
   typedef allocator< t_TyT > _TyAllocator; // the actual allocator.
 public:
+  typedef t_TyT _TyT;
   typedef typename _TyAllocator::value_type value_type;
   typedef typename _TyAllocator::size_type size_type;
   typedef typename _TyAllocator::difference_type difference_type;
@@ -61,13 +64,14 @@ public:
   ~AllocatorThrowDestruct() noexcept( false )
   {
   }
+  AllocatorThrowDestruct() = default;
   AllocatorThrowDestruct( AllocatorThrowDestruct const & ) = default;
   AllocatorThrowDestruct( AllocatorThrowDestruct && _r ) = default;
-  [[nodiscard]] constexpr T* allocate( std::size_t n )
+  constexpr _TyT* allocate( std::size_t n )
   {
     return m_alloc.allocate( n );
   }
-  constexpr void deallocate( T* p, std::size_t n )
+  constexpr void deallocate( _TyT* p, std::size_t n )
   {
     return m_alloc.deallocate( p, n );
   }
@@ -80,6 +84,7 @@ class AllocatorThrowMoveDestruct
   typedef AllocatorThrowMoveDestruct _TyThis;
   typedef allocator< t_TyT > _TyAllocator; // the actual allocator.
 public:
+  typedef t_TyT _TyT;
   typedef typename _TyAllocator::value_type value_type;
   typedef typename _TyAllocator::size_type size_type;
   typedef typename _TyAllocator::difference_type difference_type;
@@ -88,16 +93,17 @@ public:
   ~AllocatorThrowMoveDestruct() noexcept( false )
   {
   }
+  AllocatorThrowMoveDestruct() = default;
   AllocatorThrowMoveDestruct( AllocatorThrowMoveDestruct const & ) = default;
   AllocatorThrowMoveDestruct( AllocatorThrowMoveDestruct && _r ) noexcept( false )
     : m_alloc( std::move( _r.m_alloc ) )
   {
   }
-  [[nodiscard]] constexpr T* allocate( std::size_t n )
+  constexpr _TyT* allocate( std::size_t n )
   {
     return m_alloc.allocate( n );
   }
-  constexpr void deallocate( T* p, std::size_t n )
+  constexpr void deallocate( _TyT* p, std::size_t n )
   {
     return m_alloc.deallocate( p, n );
   }
@@ -105,27 +111,36 @@ protected:
   _TyAllocator m_alloc; // The actual allocator.
 };
 
-// TSharedObj1: Destructor doesn't throw.
-class TSharedObj1
+// TSharedObjNoThrowDtor: Destructor doesn't throw.
+class TSharedObjNoThrowDtor
 {
-  typedef TSharedObj1 _TyThis;
-  typedef SharedObjectBase< true > _TyBase;
+  typedef TSharedObjNoThrowDtor _TyThis;
 public:
-  TSharedObj1() = default;
-  ~TSharedObj1()  = default;
+  TSharedObjNoThrowDtor() = default;
+  ~TSharedObjNoThrowDtor()  = default;
   string m_str{"01345678900134567890013456789001345678900134567890"}; // make sure to blow out string's internal buffer.
 };
 
-// TestSharedObj:
-// Test my new impl of UTF encoding conversions vs. ICU's open source library impl.
-template < class t_PrTySharedEls >
-class TestSharedObj : public BienutilTest
+// TSharedObjThrowingDtor: Destructor might throw.
+class TSharedObjThrowingDtor
 {
-  typedef TestSharedObj _TyThis;
+  typedef TSharedObjThrowingDtor _TyThis;
+public:
+  TSharedObjThrowingDtor() = default;
+  ~TSharedObjThrowingDtor() noexcept( false ) = default;
+  string m_str{"01345678900134567890013456789001345678900134567890"}; // make sure to blow out string's internal buffer.
+};
+
+// TestSharedWeakPointer:
+// Test my new impl of UTF encoding conversions vs. ICU's open source library impl.
+template < class t_PrTySharedElAllocator >
+class TestSharedWeakPointer : public BienutilTest
+{
+  typedef TestSharedWeakPointer _TyThis;
   typedef BienutilTest _TyBase;
 public:
-  typedef typename t_PrTySharedEls::first_type _TySharedEl;
-  typedef typename t_PrTySharedEls::second_type _TySharedElDerived;
+  typedef typename t_PrTySharedElAllocator::first_type _TySharedEl;
+  typedef typename t_PrTySharedElAllocator::second_type _TySharedElAllocator;
 
 protected:
   // SetUp() is run immediately before a test starts.
@@ -137,63 +152,54 @@ protected:
   {
   }
   
-  void DoTestSharedObj()
+  void DoTestSharedWeakPointer()
   {
     // Let's try some stuff:
-    SharedWeakPtr< _TySharedEl > spse;
-    spse.emplace();
-    SharedWeakPtr< const _TySharedEl > spcse;
-    spcse.emplace();
-    spcse = spse;
-    SharedWeakPtr< volatile _TySharedEl > spvse;
-    spvse.emplace();
-    spvse = spse;
-    SharedWeakPtr< const volatile _TySharedEl > spcvse( spcse );
-    spcvse = spcse;
-    spcvse = spvse;
-    spcvse = spse;
-    // To test compiling these just uncomment them one by one and compile the unit test... I know, annoying.
-    // spse = spcvse; // this should fail to compile.
-    // spse = spcse; // this should fail to compile.
-    // spcse = spcvse; // this should fail to compile.
+    typedef SharedStrongPtr< _TySharedEl, _TySharedElAllocator > _TySharedStrongPtr1;
+    typedef SharedWeakPtr< _TySharedEl, _TySharedElAllocator > _TySharedWeakPtr1;
+    _TySharedStrongPtr1 sp1( std::in_place_t::in_place_t() );
+    _TySharedWeakPtr1 wp1( sp1 );
 
-    SharedWeakPtr< _TySharedElDerived > spseDerived;
-    spse = spseDerived;
-    spcse = spseDerived;
-    spvse = spseDerived;
-    spcvse = spseDerived;
-    
-    // spseDerived = spse; // this should fail to compile.
-    spse.template emplaceDerived< _TySharedElDerived >();
-    // This should fail to compile because we are creating a const _TySharedElDerived into a non-const container.
-    // spse.template emplaceDerived< const _TySharedElDerived >();
+    typedef SharedStrongPtr< const _TySharedEl, _TySharedElAllocator > _TyConstSharedStrongPtr1;
+    typedef SharedWeakPtr< const _TySharedEl, _TySharedElAllocator > _TyConstSharedWeakPtr1;
+    _TyConstSharedStrongPtr1 spc1( sp1 );
+    spc1 = wp1;
+    _TyConstSharedWeakPtr1 wpc1( spc1 );
 
-    // in-place construct a derived object:
-    SharedWeakPtr< const _TySharedEl > spcseDerived( in_place_type< _TySharedElDerived > );
+    typedef SharedStrongPtr< const volatile _TySharedEl, _TySharedElAllocator > _TyConstVolatileSharedStrongPtr1;
+    typedef SharedWeakPtr< const volatile _TySharedEl, _TySharedElAllocator > _TyConstVolatileSharedWeakPtr1;
+    _TyConstVolatileSharedStrongPtr1 spcv1( spc1 );
+    spcv1 = wpc1;
+    _TyConstVolatileSharedWeakPtr1 wpcv1( sp1 );
+    wpcv1 = wpc1;
+
+
   }
 protected:
 	bool m_fExpectFailure{false};
 };
 
-TYPED_TEST_SUITE_P( TestSharedObj );
+TYPED_TEST_SUITE_P( TestSharedWeakPointer );
 
-TYPED_TEST_P( TestSharedObj, SharedWeakPtrTest1 )
+TYPED_TEST_P( TestSharedWeakPointer, SharedWeakPtrTest1 )
 {
-  this->DoTestSharedObj();
+  this->DoTestSharedWeakPointer();
 }
 
 REGISTER_TYPED_TEST_SUITE_P(
-    TestSharedObj,  // The first argument is the test case name.
+    TestSharedWeakPointer,  // The first argument is the test case name.
     // The rest of the arguments are the test names.
     SharedWeakPtrTest1);
 
-typedef std::pair< TSharedObj1, TSharedObj1 > _TyPrTest01;
-typedef std::pair< TSharedObj1, TDerivedObj1 > _TyPrTest02;
+typedef std::pair< TSharedObjNoThrowDtor, allocator< char > > _TyPrTest01;
+typedef std::pair< TSharedObjThrowingDtor, allocator< char > > _TyPrTest02;
+typedef std::pair< TSharedObjNoThrowDtor, AllocatorThrowMove< char > > _TyPrTest03;
+typedef std::pair< TSharedObjThrowingDtor, AllocatorThrowMove< char > > _TyPrTest04;
 
-typedef Types<_TyPrTest01, _TyPrTest02 > vTySharedWeakPtrTestTypes;
+typedef Types<_TyPrTest01, _TyPrTest02, _TyPrTest03, _TyPrTest04 > vTySharedWeakPtrTestTypes;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(SharedWeakPtrTestInstance,    // Instance name
-                               TestSharedObj,             // Test case name
+                               TestSharedWeakPointer,             // Test case name
                                vTySharedWeakPtrTestTypes);  // Type list
 
 int _TryMain( int argc, char **argv )
