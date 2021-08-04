@@ -27,6 +27,8 @@ typedef std::allocator< char >	_TyDefaultAllocator;
 namespace ns_bienutil_test
 {
 
+// BienutilTestEnvironment:
+// We allow a random seed to be stored in this file so that we can replay scenarios for some unit testing.
 class BienutilTestEnvironment : public ::testing::Environment
 {
   typedef BienutilTestEnvironment _TyThis;
@@ -35,18 +37,30 @@ public:
   explicit BienutilTestEnvironment()
   {
   }
+  explicit BienutilTestEnvironment( uint32_t _u32Seed )
+    : m_optu32RandSeed( _u32Seed )
+  {
+  }
 protected:
   void SetUp() override 
 	{
+    // Set up the random seed either from a random devide or from a given seed.
+    // Output the value of the seed to stdout so that the user knows the value to replicate any issues found.
+    if ( !m_optu32RandSeed || !*m_optu32RandSeed )
+    {
+      // Setup the random seed randomly.
+      std::random_device rd;
+      m_optu32RandSeed = rd();
+    }
 	}
-  
-
   // TearDown() is invoked immediately after a test finishes.
   void TearDown() override 
   {
     // Nothing to do in TearDown() - we want to leave the generated unit test files so that they can be analyzed if there are any issues.
   }
 public:
+  // If the application is invoked with a seed then it is set into this.
+  optional< uint32_t > m_optu32RandSeed;
 };
 
 class BienutilTest : public testing::Test
