@@ -17,6 +17,8 @@
 
 #include <memory>
 #include <exception>
+#include <optional>
+#include <random>
 typedef std::allocator< char >	_TyDefaultAllocator;
 #include "_compat.h"
 #include "_heapchk.h"
@@ -60,7 +62,7 @@ protected:
   }
 public:
   // If the application is invoked with a seed then it is set into this.
-  optional< uint32_t > m_optu32RandSeed;
+  std::optional< uint32_t > m_optu32RandSeed;
 };
 
 class BienutilTest : public testing::Test
