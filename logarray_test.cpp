@@ -182,26 +182,55 @@ protected:
   void _TestSizedLogArrayRemoval( _TyLogArray & _la, bool _fWithUnconstructedElementAtEnd )
   {
     _VerifyLogArray( _la );
-    // Try to remove each potential bitvector of elements:
+    // Up until 17 elements we check every potential permutation of removals.
+    // After that it gets too slow to complete the unit test in any timely manner (like days at a certain point) so we
+    //  produce random permuations of removals based upon first computing a percentage and then populating that percentage of
+    //  removals in the bitvector randomly.
+    static size_t kstCheckAllPermsLimit = 17;
     typedef _simple_bitvec< size_t > _TyBv;
     _TyBv bvRemove( _la.NElements() );
-    do
+    if ( _la.NElements() <= kstCheckAllPermsLimit )
     {
-      _TyLogArray laCopy(_la);
-      _VerifyLogArray( laCopy );
-      if (_fWithUnconstructedElementAtEnd)
+      // Try to remove each potential bitvector of elements by incrementing the bitvector until it wraps around to all empty again.
+      do
       {
-        laCopy._PvAllocEnd(); // This is a safe call because it doesn't assume anything is constructed.
-        Assert(laCopy.NElements() + 1 == laCopy.NElementsAllocated());
+        _TyLogArray laCopy(_la);
+        if (_fWithUnconstructedElementAtEnd)
+        {
+          laCopy._PvAllocEnd(); // This is a safe call because it doesn't assume anything is constructed.
+          Assert(laCopy.NElements() + 1 == laCopy.NElementsAllocated());
+        }
+        else
+          Assert(laCopy.NElements() == laCopy.NElementsAllocated());
+        _VerifyLogArray( laCopy );
+        
+        laCopy.RemoveBvElements( bvRemove );
+        _VerifyLogArray( laCopy, bvRemove );
+        bvRemove.increment();
+      } 
+      while( !bvRemove.empty() );
+    }
+    else
+    {
+      static const size_t kstNCheckPermutations = 100; // Check a hundred random permutations of removals.
+      for ( size_t nCheck = kstNCheckPermutations; nCheck--;  )
+      {
+        size_t nPercentRemoved = vpxteBienutilTestEnvironment->GetRandomRanged( 1, 100 );
+        for ( size_t nBitPop = 0; nBitPop < bvRemove.size(); ++nBitPop )
+          bvRemove.setbit( nBitPop, vpxteBienutilTestEnvironment->FRandomPercentage( nPercentRemoved ) );
+        _TyLogArray laCopy(_la);
+        if (_fWithUnconstructedElementAtEnd)
+        {
+          laCopy._PvAllocEnd(); // This is a safe call because it doesn't assume anything is constructed.
+          Assert(laCopy.NElements() + 1 == laCopy.NElementsAllocated());
+        }
+        else
+          Assert(laCopy.NElements() == laCopy.NElementsAllocated());
+        _VerifyLogArray( laCopy );
+        laCopy.RemoveBvElements( bvRemove );
+        _VerifyLogArray( laCopy, bvRemove );
       }
-      else
-        Assert(laCopy.NElements() == laCopy.NElementsAllocated());
-      
-      laCopy.RemoveBvElements( bvRemove );
-      _VerifyLogArray( laCopy, bvRemove );
-      bvRemove.increment();
-    } 
-    while( !bvRemove.empty() );
+    }
   }
   void _VerifyLogArray( _TyLogArray const & _la )
   {
@@ -210,7 +239,7 @@ protected:
     size_t nElements = _la.NElements();
     for ( size_t nElCur = 0; nElCur < nElements; ++nElCur )
     {
-      Assert( nElValueCur++ == _la.ElGet( nElCur ) );
+      Assert( nElValueCur == _la.ElGet( nElCur ) );
       VerifyThrow( nElValueCur++ == _la.ElGet( nElCur ) );
     }
   }

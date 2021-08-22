@@ -28,6 +28,7 @@ typedef std::allocator< char >	_TyDefaultAllocator;
 
 namespace ns_bienutil_test
 {
+  __BIENUTIL_USING_NAMESPACE
 
 // BienutilTestEnvironment:
 // We allow a random seed to be stored in this file so that we can replay scenarios for some unit testing.
@@ -54,6 +55,8 @@ protected:
       std::random_device rd;
       m_optu32RandSeed = rd();
     }
+    // Seed either randomly or with a value passed to the unit test allowing reproduction of a failed unit test.
+    m_reRandomEngine.seed( *m_optu32RandSeed );
 	}
   // TearDown() is invoked immediately after a test finishes.
   void TearDown() override 
@@ -61,8 +64,26 @@ protected:
     // Nothing to do in TearDown() - we want to leave the generated unit test files so that they can be analyzed if there are any issues.
   }
 public:
+
+  size_t GetRandomRanged( size_t _nBegin, size_t _nEndIncl )
+  {
+    std::uniform_int_distribution< size_t > dist( _nBegin, _nEndIncl );
+    return dist( m_reRandomEngine );
+  }
+  bool FRandomPercentage( size_t _nPerc )
+  {
+    Assert( _nPerc <= 100 );
+    if ( !_nPerc )
+      return false;
+    if ( _nPerc >= 100 )
+      return true;
+    return _nPerc >= m_distPercent( m_reRandomEngine );
+  }
+
   // If the application is invoked with a seed then it is set into this.
   std::optional< uint32_t > m_optu32RandSeed;
+  std::default_random_engine m_reRandomEngine; // We seed this with the generated seed and then use it for random number generation.
+  std::uniform_int_distribution< size_t > m_distPercent{ 1, 100 }; // utility to produce a percentage.
 };
 
 class BienutilTest : public testing::Test
