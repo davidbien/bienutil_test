@@ -311,13 +311,13 @@ REGISTER_TYPED_TEST_SUITE_P(
     LogArrayTest1,
     LogArrayTestRemoval);
 
-typedef LogArray< ScalarHolder< size_t >, 0, 5 > _TyLogArray_0_5;
+typedef LogArray< ScalarHolder< size_t >, 0, 3 > _TyLogArray_0_3;
 typedef LogArray< ScalarHolder< size_t >, 1, 2 > _TyLogArray_1_2;
 typedef LogArray< ScalarHolder< size_t >, 1, 4 > _TyLogArray_1_4;
 typedef LogArray< ScalarHolder< size_t >, 2, 3 > _TyLogArray_2_3;
 typedef LogArray< ScalarHolder< size_t >, 3, 3 > _TyLogArray_3_3;
 
-typedef Types< _TyLogArray_1_2, _TyLogArray_3_3, _TyLogArray_1_4, _TyLogArray_2_3/*, _TyLogArray_0_5*/ > vTyLogArrayTestTypes;
+typedef Types< _TyLogArray_1_2, _TyLogArray_3_3, _TyLogArray_1_4, _TyLogArray_2_3, _TyLogArray_0_3 > vTyLogArrayTestTypes;
 
 INSTANTIATE_TYPED_TEST_SUITE_P(LogArrayTestInstance,    // Instance name
                                TestLogArray,             // Test case name
