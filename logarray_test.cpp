@@ -296,10 +296,10 @@ protected:
 
 TYPED_TEST_SUITE_P( TestLogArray );
 
-//TYPED_TEST_P( TestLogArray, LogArrayTest1 )
-//{
-//  this->DoTestLogArray();
-//}
+TYPED_TEST_P( TestLogArray, LogArrayTest1 )
+{
+  this->DoTestLogArray();
+}
 TYPED_TEST_P( TestLogArray, LogArrayTestRemoval )
 {
   this->DoTestLogArrayRemoval();
@@ -308,7 +308,7 @@ TYPED_TEST_P( TestLogArray, LogArrayTestRemoval )
 REGISTER_TYPED_TEST_SUITE_P(
     TestLogArray,  // The first argument is the test case name.
     // The rest of the arguments are the test names.
-//    LogArrayTest1,
+    LogArrayTest1,
     LogArrayTestRemoval);
 
 typedef LogArray< ScalarHolder< size_t >, 0, 5 > _TyLogArray_0_5;
