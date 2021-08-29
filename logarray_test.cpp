@@ -1,4 +1,10 @@
-﻿// logarray_test.cpp : Direct test new LogArray impl.
+﻿
+//          Copyright David Lawrence Bien 1997 - 2021.
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          https://www.boost.org/LICENSE_1_0.txt).
+
+// logarray_test.cpp : Direct test new LogArray impl.
 // dbien
 // 01APR2021
 

@@ -1,3 +1,9 @@
+
+//          Copyright David Lawrence Bien 1997 - 2021.
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          https://www.boost.org/LICENSE_1_0.txt).
+
 // shared_weak_test.cpp : Direct test new Shared/Weak Pointer impl.
 // dbien
 // 22JUL2021

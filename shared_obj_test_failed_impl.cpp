@@ -1,3 +1,8 @@
+//          Copyright David Lawrence Bien 1997 - 2021.
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          https://www.boost.org/LICENSE_1_0.txt).
+
 // shared_obj_test_failed_impl.cpp : Direct test new SharedPtr impl.
 // This is the unit test for shared_obj_failed_impl.h. It is a failed implementation but I want to keep it on the backburner in case I can figure any way around the catch-22.
 // dbien

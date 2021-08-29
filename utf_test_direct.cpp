@@ -1,4 +1,10 @@
-﻿// utf_test_direct.cpp : Direct test UTF conversions.
+﻿
+//          Copyright David Lawrence Bien 1997 - 2021.
+// Distributed under the Boost Software License, Version 1.0.
+//    (See accompanying file LICENSE_1_0.txt or copy at
+//          https://www.boost.org/LICENSE_1_0.txt).
+
+// utf_test_direct.cpp : Direct test UTF conversions.
 //
 
 #include "bienutil_test.h"
