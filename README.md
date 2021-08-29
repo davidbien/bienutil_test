@@ -4,7 +4,7 @@ Unit tests for various objects in the bienutil submodule include directory
 synopsis:  
 git clone --recursive git@github.com:davidbien/bienutil_test.git
 
-Requires c++20 and <compare> header existence.
+Requires c++20 and \<compare\> header existence.
 
 Linux:  
 sudo apt install uuid-dev  
