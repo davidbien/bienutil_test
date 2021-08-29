@@ -12,6 +12,6 @@ sudo apt install libicu-dev
 Requires clang11 and libc++11  
 
 Windows:  
-Runs under Visual Studio 2019 - but there is a bug with cmake projects in certain circumstances (unclear when and how) and on one of my machines it requires Visual Studio 2022 Preview to run at all.
+Compiles under Visual Studio 2019 - but there is a bug with cmake projects in certain circumstances (unclear when and how) and on one of my machines it requires Visual Studio 2022 Preview to compile at all.
 
 
