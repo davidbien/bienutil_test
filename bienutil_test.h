@@ -30,6 +30,7 @@ typedef std::allocator< char >	_TyDefaultAllocator;
 #include "_heapchk.h"
 #include "syslogmgr.inl"
 #include "_compat.inl"
+#include "icu_strutil.h"
 #include "gtest/gtest.h"
 
 namespace ns_bienutil_test
