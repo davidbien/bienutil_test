@@ -59,7 +59,7 @@ protected:
     FileObj fo( OpenReadOnlyFile( m_strFileName.c_str() ) );
     VerifyThrowSz( fo.FIsOpen(), "Couldn't open file [%s]", m_strFileName.c_str() );
     uint8_t rgbyBOM[vknBytesBOM];
-    size_t nbyLenghtBOM;
+    uint64_t nbyLenghtBOM;
     int iResult = FileRead( fo.HFileGet(), rgbyBOM, vknBytesBOM, &nbyLenghtBOM );
     Assert( !iResult );
     Assert( nbyLenghtBOM == vknBytesBOM );
@@ -70,14 +70,14 @@ protected:
     EFileCharacterEncoding efceEncodingFromFile = ( 8 == nUTF ) ? efceUTF8 : ( ( 16 == nUTF ) ? GetEncodingThisMachine( efceUTF16LE ) : GetEncodingThisMachine( efceUTF32LE ) );
     VerifyThrowSz( ( efceEncodingThisMachine == efceEncodingFromFile ), "Encoding from BOM doesn't match encoding within the filename[%s].", m_strFileName.c_str() );
 
-    size_t nbySizeFile = GetFileSizeFromHandle( fo.HFileGet() ) - nbyLenghtBOM;
+    uint64_t nbySizeFile = GetFileSizeFromHandle( fo.HFileGet() ) - nbyLenghtBOM;
     VerifyThrowSz( !!nbySizeFile, "Must have a non-zero length file to unit test squat." );
     VerifyThrowSz( !( nbySizeFile % ( nUTF / CHAR_BIT ) ), "File isn't an integral multiple of character size[%s].", m_strFileName.c_str() );
     _TyVectorBuf bufRead;
-    bufRead.resize( nbySizeFile );
+    bufRead.resize( (size_t)nbySizeFile );
     // Now seek to the end of any BOM:
     (void)NFileSeekAndThrow( fo.HFileGet(), nbyLenghtBOM, vkSeekBegin );
-    size_t nbyBytesRead;
+    uint64_t nbyBytesRead;
     iResult = FileRead( fo.HFileGet(), &bufRead[0], nbySizeFile, &nbyBytesRead );
     VerifyThrowSz( !iResult && ( nbySizeFile == nbyBytesRead ), "Error reading data from file [%s].", m_strFileName.c_str() );
     if ( efceEncodingThisMachine != efceEncoding )
@@ -85,9 +85,9 @@ protected:
       Assert( ( nUTF == 16 ) || ( nUTF == 32 ) );
       // Then must cast to switch endian.
       if ( nUTF == 16 )
-        SwitchEndian( reinterpret_cast< char16_t * >( &bufRead[0] ), nbySizeFile / sizeof( char16_t ) );
+        SwitchEndian( reinterpret_cast< char16_t * >( &bufRead[0] ), (size_t)( nbySizeFile / sizeof( char16_t ) ) );
       else
-        SwitchEndian( reinterpret_cast< char32_t * >( &bufRead[0] ), nbySizeFile / sizeof( char32_t ) );
+        SwitchEndian( reinterpret_cast< char32_t * >( &bufRead[0] ), (size_t)( nbySizeFile / sizeof( char32_t ) ) );
     }
     m_buf = std::move( bufRead );
     m_strBaseFileOutput= std::move( strBaseFile );

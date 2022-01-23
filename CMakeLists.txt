@@ -9,6 +9,7 @@ project ("bienutil_test")
 
 enable_testing()
 
+set( MOD_USE_ICU4C 1 )
 include ( bienutil/bienutil.cmake )
 
 set(GTEST_VERSION 1.10.0 CACHE STRING "Google test version")
