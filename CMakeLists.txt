@@ -1,6 +1,9 @@
 ﻿# CMakeList.txt : CMake project for bienutil_test, include source and define
 # project specific logic here.
 #
+# dbien: Review: Actually we don't end up using the below.
+# CMake projects should use: "-DCMAKE_TOOLCHAIN_FILE=/mnt/c/devenv/VcPkgForLinux/vcpkg/scripts/buildsystems/vcpkg.cmake"
+
 cmake_minimum_required (VERSION 3.8)
 include(FetchContent)
 include(GoogleTest)
@@ -13,7 +16,7 @@ set( MOD_USE_VCPKG 1 )
 set( MOD_USE_ICU4C 1 )
 include ( bienutil/bienutil.cmake )
 
-set(GTEST_VERSION 1.10.0 CACHE STRING "Google test version")
+set(GTEST_VERSION 1.12.0 CACHE STRING "Google test version")
 FetchContent_Declare(googletest
 GIT_REPOSITORY https://github.com/google/googletest.git
 GIT_TAG release-${GTEST_VERSION})
