@@ -30,13 +30,13 @@ class AllocatorThrowMove
 {
   typedef AllocatorThrowMove _TyThis;
   typedef allocator< t_TyT > _TyAllocator; // the actual allocator.
-  template < class t_TyT >
+  template < class T >
   friend class AllocatorThrowMove;
 public:
   typedef t_TyT _TyT;
   typedef typename _TyAllocator::value_type value_type;
-  typedef typename _TyAllocator::size_type size_type;
-  typedef typename _TyAllocator::difference_type difference_type;
+  typedef typename std::size_t size_type;
+  typedef typename std::ptrdiff_t difference_type;
   typedef typename _TyAllocator::propagate_on_container_move_assignment propagate_on_container_move_assignment;
 
   ~AllocatorThrowMove() = default;
@@ -67,13 +67,13 @@ class AllocatorThrowDestruct
 {
   typedef AllocatorThrowDestruct _TyThis;
   typedef allocator< t_TyT > _TyAllocator; // the actual allocator.
-  template < class t_TyT >
+  template < class T >
   friend class AllocatorThrowDestruct;
 public:
   typedef t_TyT _TyT;
   typedef typename _TyAllocator::value_type value_type;
-  typedef typename _TyAllocator::size_type size_type;
-  typedef typename _TyAllocator::difference_type difference_type;
+  typedef typename std::size_t size_type;
+  typedef typename std::ptrdiff_t difference_type;
   typedef typename _TyAllocator::propagate_on_container_move_assignment propagate_on_container_move_assignment;
 
   ~AllocatorThrowDestruct() noexcept( false )
@@ -103,13 +103,13 @@ class AllocatorThrowMoveDestruct
 {
   typedef AllocatorThrowMoveDestruct _TyThis;
   typedef allocator< t_TyT > _TyAllocator; // the actual allocator.
-  template < class t_TyT >
+  template < class T >
   friend class AllocatorThrowMoveDestruct;
 public:
   typedef t_TyT _TyT;
   typedef typename _TyAllocator::value_type value_type;
-  typedef typename _TyAllocator::size_type size_type;
-  typedef typename _TyAllocator::difference_type difference_type;
+  typedef typename std::size_t size_type;
+  typedef typename std::ptrdiff_t difference_type;
   typedef typename _TyAllocator::propagate_on_container_move_assignment propagate_on_container_move_assignment;
 
   ~AllocatorThrowMoveDestruct() noexcept( false )
@@ -186,7 +186,7 @@ protected:
     // Let's try some stuff:
     typedef SharedStrongPtr< _TySharedEl, _TySharedElAllocator > _TySharedStrongPtr1;
     typedef SharedWeakPtr< _TySharedEl, _TySharedElAllocator > _TySharedWeakPtr1;
-    _TySharedStrongPtr1 sp1( std::in_place_t::in_place_t() );
+    _TySharedStrongPtr1 sp1( std::in_place );
     _TySharedWeakPtr1 wp1( sp1 );
 
     typedef SharedStrongPtr< const _TySharedEl, _TySharedElAllocator > _TyConstSharedStrongPtr1;

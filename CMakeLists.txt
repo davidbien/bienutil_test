@@ -9,6 +9,7 @@ project ("bienutil_test")
 
 enable_testing()
 
+set( MOD_USE_VCPKG 1 )
 set( MOD_USE_ICU4C 1 )
 include ( bienutil/bienutil.cmake )
 
@@ -31,7 +32,7 @@ target_include_directories(utf_test_direct PUBLIC
 target_compile_definitions( utf_test_direct
   PUBLIC __NDEBUG_THROW
 )
-target_link_libraries(utf_test_direct gtest gtest_main)
+target_link_libraries(utf_test_direct gtest gtest_main ICU::dt ICU::uc)
 
 gtest_discover_tests(utf_test_direct)
 
@@ -42,7 +43,7 @@ target_include_directories(utf_test_file PUBLIC
 target_compile_definitions( utf_test_file
   PUBLIC __NDEBUG_THROW
 )
-target_link_libraries(utf_test_file gtest gtest_main)
+target_link_libraries(utf_test_file gtest gtest_main  ICU::dt ICU::uc)
 
 # We may not notice new unittests until CMakeLists.txt is rebuilt - that's ok.
 file(GLOB UTFUNITTESTS LIST_DIRECTORIES true unittests/*.txt )
@@ -63,7 +64,7 @@ target_include_directories(logarray_test PUBLIC
 target_compile_definitions( logarray_test
   PUBLIC __NDEBUG_THROW
 )
-target_link_libraries(logarray_test gtest gtest_main)
+target_link_libraries(logarray_test gtest gtest_main  ICU::dt ICU::uc)
 gtest_discover_tests(logarray_test)
 
 # SharedPtr testing:
@@ -74,7 +75,7 @@ target_include_directories(shared_obj_test PUBLIC
 target_compile_definitions( shared_obj_test
   PUBLIC __NDEBUG_THROW
 )
-target_link_libraries(shared_obj_test gtest gtest_main)
+target_link_libraries(shared_obj_test gtest gtest_main  ICU::dt ICU::uc)
 gtest_discover_tests(shared_obj_test)
 
 # SharedWeakPtr testing:
@@ -85,6 +86,6 @@ target_include_directories(shared_weak_test PUBLIC
 target_compile_definitions( shared_weak_test
   PUBLIC __NDEBUG_THROW
 )
-target_link_libraries(shared_weak_test gtest gtest_main)
+target_link_libraries(shared_weak_test gtest gtest_main  ICU::dt ICU::uc)
 gtest_discover_tests(shared_weak_test)
 
