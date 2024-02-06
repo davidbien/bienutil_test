@@ -1,0 +1,12 @@
+{
+  "dependencies": [
+        "icu"
+      ],
+    "overrides": [
+      { 
+          "name": "icu", 
+          "version": "70.1"
+      }
+  
+  ]
+}
